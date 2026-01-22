@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>我的能量补给站</title>
+  <!--  正确：无空格、稳定 CDN -->
+  <script src=" https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js "></script>
+  <style>
+     /* 全局样式：字体、背景渐变、居中布局 */
+    body {
+      font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    h1 {
+      text-align: center;
+      color: #c41e3a;
+      transition: color 0.3s;
+    }
+    .input-area {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .input-area input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .input-area button {
+      background: #003366;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .input-area button:hover {
+      background: #002244;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      color: #555;
+      background: #aed6f1;
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s, background 0.3s, color 0.3s;
+      position: relative;
+    }
+    li:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    /* 已完成语录：删除线样式 */
+    .completed span {
+      text-decoration: line-through;
+      color: #888;
+    }
+    .empty-tip {
+      text-align: center;
+      color: #888;
+      margin-top: 30px;
+      font-size: 16px;
+      transition: color 0.3s;
+    }
+    /*添加成功提示*/
+    .tip-message {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin: 10px 0;
+      transition: color 0.3s;
+    }
+    /* 删除按钮：红色圆形，悬浮变小手 */
+    .delete-btn {
+      background: #c41e3a;
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+      margin-left: 10px;
+    }
+    .delete-btn:hover {
+      background: #a51b32;
+    }
+    /* 今日能量卡片：左侧橙色边框，渐变背景 */
+    .todays-quote {
+      background: linear-gradient(135deg, #fff8e1, #ffecb3);
+      border-left: 5px solid #ff9800;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(255,152,0,0.2);
+      transition: background 0.3s, border-left-color 0.3s, box-shadow 0.3s;
+    }
+    .todays-quote h3 {
+      margin: 0 0 8px 0;
+      color: #e65100;
+      transition: color 0.3s;
+    }
+    .todays-quote p {
+      margin: 0;
+      font-size: 18px;
+      color: #5d4037;
+      transition: color 0.3s;
+    }
+    .no-quote-tip {
+      text-align: center;
+      color: #999;
+      margin: 20px 0;
+      font-style: italic;
+      transition: color 0.3s;
+    }
+    .refresh-btn {
+      background: #ff9800;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .refresh-btn:hover {
+      background: #fb8c00;
+    }
+    .help-btn {
+      background: #17a2b8;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    .help-btn:hover {
+      background: #138496;
+    }
+    .mode-btn {
+      background: #8e44ad;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    .mode-btn:hover {
+      background: #9b59b6;
+    }
+    /* 夜间模式 */
+    body.dark-mode {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: #ecf0f1;
+    }
+    body.dark-mode h1 {
+      color: #e74c3c;
+    }
+    body.dark-mode .input-area {
+      background: #3a3a3a;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    body.dark-mode .input-area input {
+      background: #555;
+      border-color: #666;
+      color: #ecf0f1;
+    }
+    body.dark-mode .input-area button {
+      background: #2980b9;
+    }
+    body.dark-mode .input-area button:hover {
+      background: #3498db;
+    }
+    body.dark-mode li {
+      background: #4a6572;
+      color: #ecf0f1;
+    }
+    body.dark-mode .completed span {
+      color: #aaa;
+    }
+    body.dark-mode .todays-quote {
+      background: linear-gradient(135deg, #4a4a2a, #5a5a3a);
+      border-left-color: #f39c12;
+      box-shadow: 0 2px 8px rgba(243,156,18,0.3);
+    }
+    body.dark-mode .todays-quote h3 {
+      color: #f1c40f;
+    }
+    body.dark-mode .todays-quote p {
+      color: #fdf6e3;
+    }
+    body.dark-mode .delete-btn {
+      background: #e74c3c;
+    }
+    body.dark-mode .delete-btn:hover {
+      background: #c0392b;
+    }
+    body.dark-mode .refresh-btn {
+      background: #f39c12;
+    }
+    body.dark-mode .refresh-btn:hover {
+      background: #e67e22;
+    }
+    body.dark-mode .help-btn {
+      background: #16a085;
+    }
+    body.dark-mode .help-btn:hover {
+      background: #1abc9c;
+    }
+    body.dark-mode .mode-btn {
+      background: #27ae60;
+    }
+    body.dark-mode .mode-btn:hover {
+      background: #2ecc71;
+    }
+    /* 夜间模式适配 */
+    body.dark-mode .filter-select {
+      background: #555;
+      color: #ecf0f1;
+      border-color: #777;
+    }
+    body.dark-mode .filter-select:hover {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+    }
+    body.dark-mode .filter-select:focus {
+      border-color: #5dade2;
+      box-shadow: 0 0 8px rgba(93, 173, 226, 0.6);
+    }
+    //语录标签
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+      color: white;
+      font-weight: bold;
+    }
+    .tag-勇气 { background: #2ecc71; }
+    .tag-平静 { background: #2ecc71; }
+    .tag-希望 { background: #2ecc71; }
+    .tag-自嘲 { background: #2ecc71; }
+    .tag-坚持 { background: #2ecc71; }
+    .tag-伤感 { background: #2ecc71 }
+    .music-btn {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #aed6f1;
+        background: white;
+        color: #003366;
+        cursor: pointer;
+        margin-left: 10px;
+        transition: all 0.3s;
+    }
+    .music-btn:hover {
+       border-color: #3498db;
+       box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+    body.dark-mode .music-btn {
+      background: #555;
+      color: #ecf0f1;
+      border-color: #777;
+    }
+    body.dark-mode .music-btn:hover {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 219, 0.4);
+    }
+    /* 隐藏 audio 默认控件 */
+    audio {
+      display: none;
+    }
+    /*音乐列表*/
+    .music-list {
+       margin-top: 15px;
+       text-align: center;
+    }
+    .music-list h4 {
+        color: #003366;
+    }
+    body.dark-mode .music-list h4 {
+       color: #ecf0f1;
+    }
+    .music-item {
+        padding: 6px 10px;
+        margin: 4px auto;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s;
+        max-width: 200px;
+    }
+    .music-item:hover {
+       background: #e1f5fe;
+    }
+    body.dark-mode .music-item:hover {
+      background: #444;
+    }
+    .music-item.active {
+        background: #aed6f1;
+        font-weight: bold;
+    }
+    body.dark-mode .music-item.active {
+       background: #3498db;
+       color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>⚓ 我的能量补给站</h1>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <button class="help-btn" @click="help" style="margin-right: 10px;">❓ 使用帮助</button>
+      <button class="mode-btn" @click="toggleDarkMode" :title="isDarkMode ? '切换到白天模式' : '切换到夜间模式'">
+        {{ isDarkMode ? '☀️ 白天' : '🌙 夜间' }}
+      </button>
+       <select v-model="filterTag" class="filter-select"
+               style="padding: 8px; border-radius: 4px; margin-left: 10px;">
+          <option value="all">全部语录</option>
+          <option value="勇气">勇气</option>
+          <option value="平静">平静</option>
+          <option value="希望">希望</option>
+          <option value="自嘲">自嘲</option>
+          <option value="坚持">坚持</option>
+          <option value="伤感">伤感</option>
+       </select>
+    </div>
+    <div v-if="todaysQuote" class="todays-quote">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>🌞 今日能量</h3>
+        <button class="refresh-btn" @click="changeTodaysQuote" title="换一句今日能量">
+          🔄 换一句
+        </button>
+      </div>
+      <p>{{ todaysQuote.text }}</p>
+      <p v-if="changeTip" style="color: green; font-size: 14px; margin-top: 8px;">{{ changeTip }}</p>
+    </div>
+
+    <div v-else class="no-quote-tip">
+      暂无语录，无法生成今日能量
+    </div>
+    <p v-if="tipMessage" class="tip-message">{{ tipMessage }}</p>
+    <div class="input-area">
+      <input
+        v-model="newQuote"
+        placeholder="写下今天给自己的能量语录..."
+        @keyup.enter="addQuote"/>
+      <input
+        v-model="newTag"
+        placeholder="标签（如：勇气 自嘲 希望 伤感 坚持 平静）"
+        style="margin-top: 8px;"/>
+      <button @click="addQuote">添加能量</button>
+    </div>
+    <ul v-if="filteredQuotes.length">
+      <li
+         v-for="quote in filteredQuotes"
+         :key="quote.id"
+         @click="toggleComplete(quote.id)"
+         :class="{ completed: quote.completed }">
+         <span>
+           {{ quote.text }}
+           <span v-if="quote.tag" class="tag" :class="'tag-' + (quote.tag || '').toLowerCase()">
+           {{ quote.tag }}
+           </span>
+         </span>
+         <button
+            class="delete-btn"
+            @click.stop="deleteQuote(quote.id)"
+            title="删除这条语录"
+         >✕</button>
+      </li>
+    </ul>
+    <!-- 音乐列表 -->
+    <div class="music-list">
+       <h4 style="margin: 10px 0 5px 0; text-align: center;">能量音乐</h4>
+       <ul style="list-style: none; padding: 0; margin: 0;">
+       <li
+           v-for="(track, index) in musicList"
+           :key="index"
+           @click="changeTrack(index)"
+           :class="{ active: index === currentTrackIndex }"
+           class="music-item">
+           {{ track.title }} <small v-if="index === currentTrackIndex">(播放中)</small>
+       </li>
+       </ul>
+    </div>
+      <p v-else class="empty-tip">该标签下暂无语录，试试别的吧 ✨</p>
+      <audio id="bgm" loop :src="musicList[currentTrackIndex].src">
+       你的浏览器不支持 audio 元素。
+      </audio>
+      <button class="music-btn" @click="toggleMusic" :title="isMusicPlaying ? '暂停音乐' : '播放音乐'">
+        {{ isMusicPlaying ? '⏸️ 音乐' : '🎵 音乐' }}
+      </button>
+        /*音量控制滑块*/
+      <input
+         type="range"
+         min="0"
+         max="1"
+         step="0.05"
+         v-model="musicVolume"
+         @input="setVolume(musicVolume)"
+         class="volume-slider"
+         title="调节音量"/>
+  </div>
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          quotes: [],            // 存储所有能量语录的数组
+          newQuote: '',         // 输入框当前内容
+          newTag: '',
+          tipMessage: '',       // 添加成功提示文字
+          todaysQuote: null,    // 今日随机显示的语录对象
+          changeTip: '',
+          isDarkMode: false,
+          filterTag: 'all',  // 当前筛选标签 ('all' 表示全部)
+          isMusicPlaying: false,
+          musicVolume: 0.5,  // 音量 0~1（0.5=50%）
+          musicList: [
+            {
+               title: "起风了",
+               src: "https://ws6.stream.qqmusic.qq.com/O400002J3L3S3suxlD.ogg?guid=7883874900&vkey=E3900E2125B7479582ECA19EA6E032EDA23EE2668F73DA3CCD314AB9D0E37C903FE7DA822405FC204D2F6AFB9CC5DE072480BE8B541A7E57__v2b9abcae&uin=1152921505348177057&fromtag=120532&src=O400003m2sQw02KtPM.ogg",
+               mood: "伤感"
+            },
+            {
+               title: "爱错",
+               src: "https://ws6.stream.qqmusic.qq.com/O400000s4nTA3g90Ot.ogg?guid=8499476430&vkey=8965528279C6D7DC7422C86557F97A36C04376DB6B0C313B2A94F0F08CFFE2F7CBC35E202325F9D7D536AFDE3151C135ADF24DC98EFCBFFA__v2b9abcae&uin=1152921505348177057&fromtag=120532&src=O400004fneUm24gD2c.ogg",
+               mood: "伤感"
+            }
+          ],
+           currentTrackIndex: 0   // 当前播放的曲目索引
+        };
+      },
+      methods: {
+        help() {
+          window.open("help.html", "_blank");
+        },
+        toggleDarkMode() {
+          this.isDarkMode = !this.isDarkMode;
+          if (this.isDarkMode) {
+            document.body.classList.add('dark-mode');
+            localStorage.setItem('energy_dark_mode', 'true');
+          } else {
+            document.body.classList.remove('dark-mode');
+            localStorage.setItem('energy_dark_mode', 'false');
+          }
+        },
+        addQuote() {
+          if (this.newQuote.trim()) {
+            this.quotes.push({
+              id: Date.now(),
+              text: this.newQuote.trim(),
+              tag: this.newTag.trim(),
+              completed: false
+            });
+            this.newQuote = '';
+            localStorage.setItem('energy_quotes', JSON.stringify(this.quotes));
+            this.tipMessage = ' 添加成功！';
+            setTimeout(() => {
+              this.tipMessage = '';
+            }, 1500);
+            this.pickTodaysQuote();
+          }
+        },
+        toggleComplete(id) {
+          const quote = this.quotes.find(q => q.id === id);
+          if (quote) {
+            quote.completed = !quote.completed;
+            localStorage.setItem('energy_quotes', JSON.stringify(this.quotes));
+          }
+        },
+        deleteQuote(id) {
+          this.quotes = this.quotes.filter(q => q.id !== id);
+          localStorage.setItem('energy_quotes', JSON.stringify(this.quotes));
+          if (this.todaysQuote && this.todaysQuote.id === id) {
+            this.pickTodaysQuote();
+          }
+        },
+        pickTodaysQuote() {
+          if (this.quotes.length === 0) {
+            this.todaysQuote = null;
+            return;
+          }
+          const todayKey = new Date().toDateString();
+          let seed = 0;
+          for (let i = 0; i < todayKey.length; i++) {
+            seed += todayKey.charCodeAt(i);
+          }
+          const index = seed % this.quotes.length;
+          if (index >= 0 && index < this.quotes.length) {
+            this.todaysQuote = this.quotes[index];
+          } else {
+            this.todaysQuote = this.quotes[0];
+          }
+        },
+        changeTodaysQuote() {
+          if (this.quotes.length === 0) return;
+          const todayKey = new Date().toDateString();
+          const seconds = new Date().getSeconds();
+          let seed = 0;
+          for (let i = 0; i < todayKey.length; i++) {
+            seed += todayKey.charCodeAt(i);
+          }
+          seed += seconds;
+          const index = seed % this.quotes.length;
+          if (index >= 0 && index < this.quotes.length) {
+            this.todaysQuote = this.quotes[index];
+            this.changeTip = ' 已切换今日能量';
+          } else {
+            this.todaysQuote = this.quotes[0];
+          }
+          setTimeout(() => {
+            this.changeTip = '';
+          }, 1500);
+        },
+        toggleMusic() {
+          const audio = document.getElementById('bgm');
+          if (!audio) return;
+
+          if (this.isMusicPlaying) {
+            audio.pause();
+          } else {
+            // 如果当前曲目 src 为空，先设回默认
+            if (!audio.src) {
+              audio.src = this.musicList[this.currentTrackIndex].src;
+            }
+            // 用 play() 返回的 Promise 捕获可能的错误（如被阻止）
+            audio.play().catch(err => {
+              console.log("播放被阻止，请检查浏览器设置", err);
+              alert("请点击页面任意处后再试，或检查浏览器是否允许自动播放");
+            });
+          }
+          this.isMusicPlaying = !this.isMusicPlaying;
+        },
+        setVolume(vol) {
+           const audio = document.getElementById('bgm');
+           if (audio) {
+              audio.volume = vol;
+              //保存到 localStorage，刷新后记住
+              localStorage.setItem('energy_music_volume', vol);
+           }
+        },
+        changeTrack(index) {
+            if (index < 0 || index >= this.musicList.length) return;
+            const audio = document.getElementById('bgm');
+            const wasPlaying = this.isMusicPlaying;
+            this.currentTrackIndex = index;
+            if (audio) {
+                audio.src = this.musicList[index].src;
+            // 如果之前是播放状态，切歌后继续播放
+                if (wasPlaying) {
+                  audio.play().catch(err => console.log("切歌播放失败", err));
+                }
+            }
+        }
+      }, //  methods 结束
+      computed: {
+        filteredQuotes() {
+          if (this.filterTag === 'all') {
+            return this.quotes;
+          }
+          return this.quotes.filter(q => q.tag === this.filterTag);
+        }
+      },
+      mounted() {
+        console.log(" 进入 mounted，检查数据...");
+        const saved = localStorage.getItem('energy_quotes');
+        if (saved) {
+          this.quotes = JSON.parse(saved);
+        }
+        this.pickTodaysQuote();
+        const dark = localStorage.getItem('energy_dark_mode');
+        if (dark === 'true') {
+          this.isDarkMode = true;
+          document.body.classList.add('dark-mode');
+        }
+        //  初始化音乐音量
+        const audio = document.getElementById('bgm');
+        if (audio) {
+          //读取保存音量
+          const savedVol = localStorage.getItem('energy_music_volume');
+          if (savedVol !== null) {
+            this.musicVolume = parseFloat(savedVol);
+          }
+          //设置audio
+          audio.volume = this.musicVolume;
+        }
+      } //  mounted 结束
+    }) //  createApp 结束
+    .mount('#app'); //  挂载
+  </script>
+</body>
+</html>
